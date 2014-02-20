@@ -34,6 +34,7 @@ class Debug extends AbstractCommand
 				'<comment>Terminal?</comment>    '. ($route['terminal'] ? 'Yes' : 'No'),
 				'<comment>Pattern</comment>      '. $route['pattern'],
 				'<comment>Defaults</comment>     '. ($this->formatArray($route['defaults']) ?: '-'),
+				'<comment>Constraints</comment>  '. ($this->formatArray($route['constraints']) ?: '-'),
 				'<comment>Child routes</comment> '. ($this->formatArray($route['child_routes']) ?: '-'),
 			));
 		}
@@ -99,17 +100,17 @@ class Debug extends AbstractCommand
 		return implode("\n" . str_repeat(' ', 13), $output);
 	}
 
-	protected function parseRoutes(array $routes, $parent = '', $pattern = '', $defaults = array())
+	protected function parseRoutes(array $routes, $parent = '', $pattern = '', $options = array())
 	{
 		$parsed = array();
 		foreach ($routes as $name => $route)
 		{
-			$parsed = array_merge($parsed, $this->parseRoute($route, $parent . $name, $pattern, $defaults));
+			$parsed = array_merge($parsed, $this->parseRoute($route, $parent . $name, $pattern, $options));
 		}
 		return $parsed;
 	}
 
-	protected function parseRoute(array $route, $name = '', $pattern = '', $defaults = array())
+	protected function parseRoute(array $route, $name = '', $pattern = '', $options = array())
 	{
 		$parsed = array();
 
@@ -118,13 +119,19 @@ class Debug extends AbstractCommand
 			'options' => array(
 				'route' => '',
 				'defaults' => array(),
+				'constraints' => array(),
 			),
 			'may_terminate' => false,
 			'child_routes' => array(),
 		), $route);
+		$options = array_replace_recursive(array(
+			'defaults' => array(),
+			'constraints' => array(),
+		), $options);
 
 		$pattern .= $route['options']['route'];
-		$defaults = array_merge($defaults, $route['options']['defaults']);
+		$defaults = array_merge($options['defaults'], $route['options']['defaults']);
+		$constraints = array_merge($options['constraints'], $route['options']['constraints']);
 
 		$parsed[$name] = array(
 			'name' => $name,
@@ -132,6 +139,7 @@ class Debug extends AbstractCommand
 			'pattern' => $pattern,
 			'terminal' => ($route['may_terminate'] || empty($route['child_routes'])),
 			'defaults' => $defaults,
+			'constraints' => $constraints,
 			'child_routes' => array_map(function($child) use ($name)
 			{
 				return $name .'/'. $child;
@@ -140,7 +148,10 @@ class Debug extends AbstractCommand
 
 		sort($parsed[$name]['child_routes']);
 
-		$parsed = array_merge($parsed, $this->parseRoutes($route['child_routes'], $name .'/', $pattern, $defaults));
+		$parsed = array_merge($parsed, $this->parseRoutes($route['child_routes'], $name .'/', $pattern, array(
+			'defaults' => $defaults,
+			'constraints' => $constraints,
+		)));
 
 		return $parsed;
 	}
