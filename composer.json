@@ -1,0 +1,22 @@
+{
+	"name": "radnan/rdn-router",
+	"description": "Zend Framework 2 simple router debug utility",
+	"keywords": ["zf2", "zend", "router", "debug"],
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "radnan",
+			"email": "rafiadnan47@gmail.com"
+		}
+	],
+	"require": {
+		"radnan/rdn-console": "1.*",
+		"radnan/rdn-factory": "1.*",
+		"zendframework/zend-modulemanager": "2.*"
+	},
+	"autoload": {
+		"psr-0": {
+			"RdnRouter\\": "src/"
+		}
+	}
+}
