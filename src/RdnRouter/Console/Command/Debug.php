@@ -60,8 +60,8 @@ class Debug extends AbstractCommand
 					$route['type'],
 					$route['terminal'] ? 'Yes' : 'No',
 					$route['pattern'],
-					$route['defaults']['controller'],
-					$route['defaults']['action'],
+					isset($route['defaults']['controller']) ? $route['defaults']['controller'] : '',
+					isset($route['defaults']['action']) ? $route['defaults']['action'] : '',
 				));
 			}
 
